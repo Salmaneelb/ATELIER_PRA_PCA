@@ -231,27 +231,47 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
-*..Répondez à cet exercice ici..*
+- pra-data : c'est le volume qui contient la base SQLite en production. Si on le supprime, la base est perdue.
+- pra-backup : c'est le volume qui stocke les fichiers de sauvegarde. Si on le supprime, il n'y a plus aucune possibilité de restauration.
+- Les disques locaux : Si le disque physique est perdu, les PVC disparaissent.
 
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-*..Répondez à cet exercice ici..*
+- Même si le pre-data est supprimé, les données n'ont pas été perdues définitivement car elles aivaient été copiées vers un second volume, le pra-backup, grâce au CronJob qui fais des sauvegarde toutes les minutes.
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
   
-*..Répondez à cet exercice ici..*
+- RPO (Recovery Point Objective) = 1 minutes
+  Car les sauvegardes sont déclenchées chaque minutes via le CronJob.
+
+- RTO (Recovery Time Objective) = quelques minutes
+  Car recréer l'infrastructure, lance la restauration et attend le retour    du service
 
 **Exercice 4 :**  
 Pourquoi cette solution (cet atelier) ne peux pas être utilisé dans un vrai environnement de production ? Que manque-t-il ?   
   
-*..Répondez à cet exercice ici..*
+- Car il n'y a pas de réplication hors site : pra-data et pra-backup sont    dans le même cluster et sur le même stockage local.
+  Les sauvegardes se font uniquement sur Kubernetes et pas dans un           stockage externe.
+  La restauration se fait manuellement, Kubernetes ne fais pas le PRA tout   seul.
   
 **Exercice 5 :**  
-Proposez une archtecture plus robuste.   
+1. Base de données :
+   - Remplacer SQLite par MySQL
   
-*..Répondez à cet exercice ici..*
+2. Stockage/sauvegardes :
+   - stockage persistant sur un backend fiable
+   - Backups hors cluster vers un stockage externe avec rentention et           chiffrement.
+  
+3. Multi-site :
+   - Cluster multi-site + réplication de stockage
+  
+4. Automatisation PRA :
+   - Runbooks
+   - Tests réguliers de restauration
+   - Monitoring
+  
 
 ---------------------------------------------------
 Séquence 6 : Ateliers  
